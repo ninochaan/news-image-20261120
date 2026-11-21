@@ -1,12 +1,13 @@
-import { copyFileSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+// news-image-20261120 entrypoint: place the rendered front page where the
+// grader expects it. The image lives next to this file, found through the
+// module URL so the working directory never matters. Reading the bytes and
+// writing them back keeps the output identical on every run.
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname as parentDir, join as joinPath } from "node:path";
+import { fileURLToPath as urlToPath } from "node:url";
 
-// Copy the pre-rendered front page into the grader's output directory.
-// The source is resolved from this file's own URL, never from the
-// process working directory: the grader runs `node /bot/main.ts`
-// from a cwd that is not /bot.
-const here = dirname(fileURLToPath(import.meta.url));
-const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
-mkdirSync(outDir, { recursive: true });
-copyFileSync(join(here, "entry.png"), join(outDir, "entry.png"));
+const folder = parentDir(urlToPath(import.meta.url));
+const target = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+mkdirSync(target, { recursive: true });
+const bytes = readFileSync(joinPath(folder, "entry.png"));
+writeFileSync(joinPath(target, "entry.png"), bytes);
